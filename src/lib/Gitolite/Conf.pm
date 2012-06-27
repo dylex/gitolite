@@ -53,12 +53,10 @@ sub parse {
         } elsif ( $line =~ /^(-|C|R|RW\+?(?:C?D?|D?C?)M?) (.* )?= (.+)/ ) {
             my $perm  = $1;
             my @refs  = parse_refs( $2 || '' );
-            my @users = parse_users($3);
+            my ($users, $exclude) = parse_users($3);
 
             for my $ref (@refs) {
-                for my $user (@users) {
-                    add_rule( $perm, $ref, $user );
-                }
+                add_rule( $perm, $ref, $users, $exclude );
             }
         } elsif ( $line =~ /^config (.+) = ?(.*)/ ) {
             my ( $key, $value ) = ( $1, $2 );

@@ -90,16 +90,20 @@ sub parse_refs {
 sub parse_users {
     my $users = shift;
     my @users = split ' ', $users;
+    my @posusers = grep(!/^!/, @users);
+    my @negusers = grep(s/^!//, @users);
     do { _die "bad username '$_'" unless $_ =~ $USERNAME_PATT }
       for @users;
 
-    return @users;
+    return \@posusers, \@negusers;
 }
 
 sub add_rule {
-    my ( $perm, $ref, $user ) = @_;
+    my ( $perm, $ref, $users, $exclude ) = @_;
     _die "bad ref '$ref'"   unless $ref  =~ $REPOPATT_PATT;
-    _die "bad user '$user'" unless $user =~ $USERNAME_PATT;
+    for my $user (@$users, @$exclude) {
+        _die "bad user '$user'" unless $user =~ $USERNAME_PATT;
+    }
 
     $nextseq++;
     for my $repo (@repolist) {
@@ -110,7 +114,12 @@ sub add_rule {
             next;
         }
 
-        push @{ $repos{$repo}{$user} }, [ $nextseq, $perm, $ref ];
+        for my $user (@$users) {
+            push @{ $repos{$repo}{$user} }, [ $nextseq, $perm, $ref ];
+        }
+        for my $user (@$exclude) {
+            push @{ $repos{$repo}{$user} }, [ $nextseq, '', $ref ];
+        }
     }
 }
 

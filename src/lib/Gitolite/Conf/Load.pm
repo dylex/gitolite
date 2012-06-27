@@ -259,7 +259,12 @@ sub load_1 {
             }
         }
 
-        @rules = sort { $a->[0] <=> $b->[0] } @rules;
+        @rules = sort { $a->[0] <=> $b->[0] || $a->[1] cmp $b->[1] } @rules;
+        # uniquify and remove excluded rules
+        my $lastseq = 0;
+        @rules = grep {
+            $_->[0] != $lastseq and $lastseq = $_->[0] and $_->[1]
+        } @rules;
 
         $lastrepo = $repo;
         $lastuser = $user;
