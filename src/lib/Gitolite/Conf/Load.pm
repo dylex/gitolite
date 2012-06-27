@@ -318,7 +318,7 @@ sub memberships {
     push @ret, @{ ext_grouplist($base) } if $type eq 'user' and $rc{GROUPLIST_PGM};
 
     @ret = @{ sort_u( \@ret ) };
-    trace( 3, sort @ret );
+    trace( 3, @ret );
     return @ret;
 }
 
@@ -415,7 +415,7 @@ sub creator {
         my $pgm  = $rc{GROUPLIST_PGM};
         return [] if not $pgm;
 
-        return $cache{$user} if $cache{$user};
+        return $cache{$user} if exists $cache{$user};
         my @extgroups = map { s/^@?/@/; $_; } split ' ', `$rc{GROUPLIST_PGM} $user`;
         return ( $cache{$user} = \@extgroups );
     }
